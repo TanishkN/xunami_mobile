@@ -1,15 +1,15 @@
 package main
 
 import (
-	"your_project/controllers"
+	"xunami_mobile/webserver"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func initializeRoutes(app *fiber.App) {
 	// Define your routes
-	app.Post("/register", controllers.Register)
-	app.Post("/login", controllers.Login)
-	app.Get("/user", controllers.User)
-	app.Post("/logout", controllers.Logout)
+	app.Post("/register", webserver.Register)
+	app.Post("/login", webserver.Login)
+	app.Get("/user", webserver.User)
+	app.Post("/logout", webserver.Logout)
 }
