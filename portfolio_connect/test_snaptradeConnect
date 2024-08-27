@@ -1,0 +1,49 @@
+const { Snaptrade } = require("snaptrade-typescript-sdk");
+const { v4: uuidv4 } = require('uuid');
+
+// Load environment variables from .env file
+
+async function main() {
+  try {
+    // 1) Initialize a client with your clientID and consumerKey.
+    const snaptrade = new Snaptrade({
+      clientId: 'lvjONDuH7231UgFgNNtdNUqMbKq7J26ToForrSZXmWJjNcy578',
+      consumerKey: 'MVMNT-TEST',
+    });
+
+    // 2) Check that the client is able to make a request to the API server.
+    const status = await snaptrade.apiStatus.check();
+    console.log("status:", status.data);
+
+    // 3) Create a new user on SnapTrade
+    const userId = uuidv4();
+    const { userSecret } = (await snaptrade.authentication.registerSnapTradeUser({
+      userId,
+    })).data;
+
+    // Note: A user secret is only generated once. It's required to access
+    // resources for certain endpoints.
+    console.log("userSecret:", userSecret);
+
+    // 4) Get a redirect URI. Users will need this to connect
+    const loginData = (await snaptrade.authentication.loginSnapTradeUser({ userId, userSecret })).data;
+    if (!("redirectURI" in loginData)) throw Error("Should have gotten redirect URI");
+    console.log("redirectURI:", loginData.redirectURI);
+
+    // 5) Obtaining account holdings data
+    const holdings = (await snaptrade.accountInformation.getAllUserHoldings({
+      userId,
+      userSecret,
+    })).data;
+    console.log("holdings:", holdings);
+
+    // 6) Deleting a user
+    const deleteResponse = (await snaptrade.authentication.deleteSnapTradeUser({ userId })).data;
+    console.log("deleteResponse:", deleteResponse);
+
+  } catch (error) {
+    console.error("An error occurred:", error);
+  }
+}
+
+main();
