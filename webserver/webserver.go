@@ -1,18 +1,26 @@
-package main
+package webserver
 
 import (
 	"os"
 	"strconv"
 	"time"
 
-	//"your_project/database"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm" // Ensure to import GORM for database interactions
 )
 
 var SecretKey = os.Getenv("SECRET_KEY")
+var DB *gorm.DB // This should be initialized in your main application
+
+// User represents the user model in the database
+type User struct {
+	ID       uint `gorm:"primaryKey"`
+	Name     string
+	Email    string `gorm:"unique"`
+	Password []byte
+}
 
 // Utility function to hash passwords
 func hashPassword(password string) ([]byte, error) {
@@ -34,6 +42,7 @@ func generateJWT(userID uint) (string, error) {
 	return claims.SignedString([]byte(SecretKey))
 }
 
+// Register handles user registration
 func Register(c *fiber.Ctx) error {
 	var data map[string]string
 
@@ -46,19 +55,20 @@ func Register(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusInternalServerError, "Failed to hash password")
 	}
 
-	user := database.User{
+	user := User{
 		Name:     data["name"],
 		Email:    data["email"],
 		Password: password,
 	}
 
-	if result := database.DB.Create(&user); result.Error != nil {
+	if result := DB.Create(&user); result.Error != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "Failed to create user")
 	}
 
 	return c.JSON(user)
 }
 
+// Login handles user login
 func Login(c *fiber.Ctx) error {
 	var data map[string]string
 
@@ -66,9 +76,9 @@ func Login(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid input")
 	}
 
-	var user database.User
+	var user User
 
-	if result := database.DB.Where("email = ?", data["email"]).First(&user); result.Error != nil {
+	if result := DB.Where("email = ?", data["email"]).First(&user); result.Error != nil {
 		return fiber.NewError(fiber.StatusNotFound, "User not found")
 	}
 
@@ -95,6 +105,7 @@ func Login(c *fiber.Ctx) error {
 	})
 }
 
+// User retrieves user information
 func User(c *fiber.Ctx) error {
 	cookie := c.Cookies("jwt")
 
@@ -108,15 +119,16 @@ func User(c *fiber.Ctx) error {
 
 	claims := token.Claims.(*jwt.StandardClaims)
 
-	var user database.User
+	var user User
 
-	if result := database.DB.Where("id = ?", claims.Issuer).First(&user); result.Error != nil {
+	if result := DB.Where("id = ?", claims.Issuer).First(&user); result.Error != nil {
 		return fiber.NewError(fiber.StatusNotFound, "User not found")
 	}
 
 	return c.JSON(user)
 }
 
+// Logout handles user logout
 func Logout(c *fiber.Ctx) error {
 	cookie := fiber.Cookie{
 		Name:     "jwt",

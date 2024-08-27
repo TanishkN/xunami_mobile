@@ -1,9 +1,13 @@
-package main
+package middleware
 
 import (
+	"os"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 )
+
+var SecretKey = os.Getenv("SECRET_KEY")
 
 func enableCORS() fiber.Handler {
 	return func(c *fiber.Ctx) error {
@@ -22,7 +26,9 @@ func checkToken() fiber.Handler {
 		})
 
 		if err != nil || !token.Valid {
-			return statusHandler(c, err, fiber.StatusUnauthorized)
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Unauthenticated",
+			})
 		}
 
 		return c.Next()
