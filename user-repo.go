@@ -1,8 +1,8 @@
 package webserver
 
 import (
-"context"
-	"../src"
+	"context"
+	"log"
 	"cloud.google.com/go/firestore"
 )
 
@@ -14,7 +14,7 @@ type test_repo struct struct{}
 
 //New Post Repository
 func NewUserRepository() UserRepository{
-	return &repo{}
+	return &test_repo{}
 }
 
 const (
@@ -22,7 +22,7 @@ const (
 	colletionName string = "user"
 )
 
-func Save(post *entity.Post) (*entity.Post,error){
+func Save(user *entity.User) (*entity.User,error){
 	ctx:=context.Background()//gives an empty context
 	client, err:= firestore.NewClient(ctx,projectID) //calling function and handling errors  
 	if err != nil{
@@ -30,11 +30,15 @@ func Save(post *entity.Post) (*entity.Post,error){
 		return nil, err
 	}
 	client.Collection((colletionName)).Add(ctx, map[string]interface{}){
-		"Email":post.Email,
-		"LastName":post.LastName,
-		"FirstName": post.FirstName,
-		"Number": post.Number
+		"Email":user.Email,
+		"LastName":user.LastName,
+		"FirstName":user.FirstName,
+		"Number":user.Number
 
+	}
+	if err !=nil {
+		log.Fatalf("Failed adding a new User:"%v, err)
+		return nil, err
 	}
 }
 

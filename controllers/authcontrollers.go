@@ -4,10 +4,10 @@ import (
 	"strconv"
 	"time"
 
-	"../database"
-	"../models"
+	"github.com/TanishkN/xunami_mobile/database"
+	"github.com/TanishkN/xunami_mobile/models"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v3"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,9 +23,10 @@ func Register(c *fiber.Ctx) error {
 	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
 
 	user := models.User{
-		Name:     data["name"],
-		Email:    data["email"],
-		Password: password,
+		ID       string    `json:"id"`
+		Name     string `json:"name"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	database.DB.Create(&user)

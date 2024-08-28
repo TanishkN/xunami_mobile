@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	firebase "firebase.google.com/go"
 	"firebase.google.com/go/db"
 	"google.golang.org/api/option"
 )
@@ -20,7 +21,7 @@ func Connect() {
 	}
 
 	// Get a database client from the Firebase app
-	client, err := app.DatabaseWithURL(context.Background(), "https://your-database-name.firebaseio.com/") // Replace with your Firebase database URL
+	client, err := app.DatabaseWithURL(context.Background(), "firebase-adminsdk-tlmx5@xunami-userbase.iam.gserviceaccount.com") // Replace with your Firebase database URL
 	if err != nil {
 		log.Fatalf("error connecting to Firebase Database: %v\n", err)
 	}

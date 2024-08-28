@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"../controllers"
-	"github.com/gofiber/fiber"
+	"github.com/TanishkN/xunami_mobile/controllers"
+	"github.com/gofiber/fiber/v3"
 )
 
 func Setup(app *fiber.App) {
